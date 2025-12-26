@@ -10,6 +10,7 @@ import {
   ProfileScreen,
   SettingsScreen,
   ChangePasswordScreen,
+  EditProfileScreen,
 } from '../screens';
 import { useTheme } from '../context';
 
@@ -51,6 +52,7 @@ const ProfileStack = () => {
       <Stack.Screen name="ProfileMain" component={ProfileScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     </Stack.Navigator>
   );
 };
