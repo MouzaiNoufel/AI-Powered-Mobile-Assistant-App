@@ -148,8 +148,12 @@ const api = {
 
   // AI
   ai: {
-    sendMessage: (message, conversationId = null, personality = null) =>
-      apiClient.post('/ai/chat', { message, conversationId, personality }),
+    sendMessage: (message, conversationId = null, personality = null) => {
+      const body = { message };
+      if (conversationId) body.conversationId = conversationId;
+      if (personality) body.personality = personality;
+      return apiClient.post('/ai/chat', body);
+    },
     getStatus: () => apiClient.get('/ai/status'),
     getUsage: () => apiClient.get('/ai/usage'),
     getConversations: (params = {}) => 

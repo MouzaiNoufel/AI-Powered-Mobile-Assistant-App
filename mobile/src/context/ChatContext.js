@@ -101,7 +101,7 @@ export const ChatProvider = ({ children }) => {
       // Send to API
       const response = await api.ai.sendMessage(
         message,
-        currentConversation?.id || options.conversationId,
+        currentConversation?.id || currentConversation?._id || options.conversationId,
         options.personality
       );
 
