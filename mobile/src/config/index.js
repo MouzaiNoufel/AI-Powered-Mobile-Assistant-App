@@ -1,9 +1,9 @@
 // App configuration
 const ENV = {
   development: {
-    apiUrl: 'http://localhost:3000/api/v1',
-    // For Android Emulator: 'http://10.0.2.2:3000/api/v1'
-    // For iOS Simulator with local IP: 'http://192.168.1.x:3000/api/v1'
+    apiUrl: 'http://192.168.100.162:5000/api/v1',
+    // For Android Emulator: 'http://10.0.2.2:5000/api/v1'
+    // For iOS Simulator with local IP: 'http://192.168.x.x:5000/api/v1'
   },
   staging: {
     apiUrl: 'https://staging-api.aiassistant.com/api/v1',

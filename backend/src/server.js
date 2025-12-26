@@ -5,7 +5,7 @@ const morgan = require('morgan');
 const compression = require('compression');
 
 const config = require('./config');
-const connectDatabase = require('./config/database');
+const { connectDatabase } = require('./config/database');
 const routes = require('./routes');
 const { errorHandler, notFound, apiLimiter } = require('./middleware');
 const logger = require('./utils/logger');
