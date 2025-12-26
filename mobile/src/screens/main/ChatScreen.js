@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import {
   View,
   FlatList,
@@ -16,6 +16,7 @@ import {
   ChatInput,
   TypingIndicator,
   EmptyState,
+  QuickPrompts,
 } from '../../components';
 
 const ChatScreen = ({ navigation }) => {
@@ -32,6 +33,7 @@ const ChatScreen = ({ navigation }) => {
   } = useChat();
 
   const flatListRef = useRef(null);
+  const [selectedPrompt, setSelectedPrompt] = useState('');
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -43,12 +45,17 @@ const ChatScreen = ({ navigation }) => {
   }, [messages]);
 
   const handleSend = useCallback(async (message) => {
+    setSelectedPrompt('');
     await sendMessage(message);
   }, [sendMessage]);
 
   const handleNewChat = useCallback(() => {
     startNewConversation();
   }, [startNewConversation]);
+
+  const handlePromptSelect = useCallback((prompt) => {
+    setSelectedPrompt(prompt);
+  }, []);
 
   const renderMessage = useCallback(({ item, index }) => {
     const isUser = item.role === 'user';
@@ -65,11 +72,25 @@ const ChatScreen = ({ navigation }) => {
   }, [messages]);
 
   const renderEmptyChat = () => (
-    <EmptyState
-      icon="chatbubble-ellipses-outline"
-      title="Start a Conversation"
-      message="Send a message to begin chatting with your AI assistant"
-    />
+    <View style={styles.emptyContainer}>
+      <View style={[styles.welcomeCard, { backgroundColor: theme.colors.surface }]}>
+        <View style={[styles.aiIconLarge, { backgroundColor: theme.colors.primary + '20' }]}>
+          <Ionicons name="sparkles" size={40} color={theme.colors.primary} />
+        </View>
+        <Text style={[styles.welcomeTitle, { color: theme.colors.text }]}>
+          Welcome to AI Assistant
+        </Text>
+        <Text style={[styles.welcomeSubtitle, { color: theme.colors.textSecondary }]}>
+          I'm here to help you with anything. Ask questions, get creative ideas, or just have a conversation!
+        </Text>
+      </View>
+      
+      {/* Quick Prompts */}
+      <QuickPrompts 
+        onSelectPrompt={handlePromptSelect}
+        visible={messages.length === 0}
+      />
+    </View>
   );
 
   const ListHeaderComponent = () => {
@@ -226,6 +247,7 @@ const ChatScreen = ({ navigation }) => {
         <ChatInput
           onSend={handleSend}
           disabled={isSending || !canSend}
+          initialValue={selectedPrompt}
           placeholder={
             !canSend
               ? 'Daily limit reached'
@@ -283,6 +305,35 @@ const styles = StyleSheet.create({
   },
   emptyList: {
     flex: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  welcomeCard: {
+    marginHorizontal: 24,
+    padding: 24,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  aiIconLarge: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  welcomeTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  welcomeSubtitle: {
+    fontSize: 15,
+    textAlign: 'center',
+    lineHeight: 22,
   },
   chatHeader: {
     alignItems: 'center',

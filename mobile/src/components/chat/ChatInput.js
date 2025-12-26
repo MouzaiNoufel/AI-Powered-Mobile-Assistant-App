@@ -7,6 +7,7 @@ import {
   Animated,
   Keyboard,
   Platform,
+  Text,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -19,12 +20,22 @@ const ChatInput = ({
   disabled = false,
   placeholder = 'Type a message...',
   maxLength = 10000,
+  onPromptSelect,
+  initialValue = '',
 }) => {
   const { theme } = useTheme();
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(initialValue);
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef(null);
   const sendButtonScale = useRef(new Animated.Value(1)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (initialValue) {
+      setMessage(initialValue);
+      inputRef.current?.focus();
+    }
+  }, [initialValue]);
 
   const canSend = message.trim().length > 0 && !disabled;
 
