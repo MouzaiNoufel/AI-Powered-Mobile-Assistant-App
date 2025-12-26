@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,21 @@ import {
   ScrollView,
   Alert,
   Switch,
+  TextInput,
+  Modal,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useAuth } from '../../context';
 import { SettingsItem, Button, LoadingIndicator } from '../../components';
+import api from '../../services/api';
 
 const PERSONALITY_OPTIONS = [
   { id: 'professional', label: 'Professional', icon: '[P]', description: 'Formal and business-like' },
   { id: 'friendly', label: 'Friendly', icon: '[F]', description: 'Casual and warm' },
-  { id: 'creative', label: 'Creative', icon: '[C]', description: 'Imaginative and expressive' },
-  { id: 'technical', label: 'Technical', icon: '[T]', description: 'Detailed and precise' },
+  { id: 'concise', label: 'Concise', icon: '[C]', description: 'Brief and to the point' },
+  { id: 'detailed', label: 'Detailed', icon: '[D]', description: 'Thorough and comprehensive' },
 ];
 
 const SettingsScreen = ({ navigation }) => {
@@ -29,6 +34,9 @@ const SettingsScreen = ({ navigation }) => {
     user?.preferences?.aiPersonality || 'friendly'
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const getThemeLabel = () => {
     switch (themeMode) {
@@ -113,18 +121,31 @@ const SettingsScreen = ({ navigation }) => {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            Alert.alert(
-              'Confirm Deletion',
-              'Type "DELETE" to confirm account deletion.',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'I Understand', style: 'destructive', onPress: () => {} },
-              ]
-            );
+            setShowDeleteModal(true);
           },
         },
       ]
     );
+  };
+
+  const confirmDeleteAccount = async () => {
+    if (!deletePassword) {
+      Alert.alert('Error', 'Please enter your password to confirm deletion');
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await api.auth.deleteAccount(deletePassword);
+      setShowDeleteModal(false);
+      await logout();
+      Alert.alert('Account Deleted', 'Your account has been permanently deleted.');
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to delete account. Please check your password.');
+    } finally {
+      setIsDeleting(false);
+      setDeletePassword('');
+    }
   };
 
   const handleLogout = () => {
@@ -375,6 +396,74 @@ const SettingsScreen = ({ navigation }) => {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Delete Account Modal */}
+      <Modal
+        visible={showDeleteModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+            <View style={styles.modalHeader}>
+              <Ionicons name="warning" size={48} color={theme.colors.error} />
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
+                Delete Account
+              </Text>
+              <Text style={[styles.modalSubtitle, { color: theme.colors.textSecondary }]}>
+                Enter your password to confirm deletion. This action is irreversible.
+              </Text>
+            </View>
+
+            <TextInput
+              style={[
+                styles.passwordInput,
+                {
+                  backgroundColor: theme.colors.inputBackground,
+                  borderColor: theme.colors.border,
+                  color: theme.colors.text,
+                },
+              ]}
+              placeholder="Enter your password"
+              placeholderTextColor={theme.colors.textMuted}
+              secureTextEntry
+              value={deletePassword}
+              onChangeText={setDeletePassword}
+              editable={!isDeleting}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton, { backgroundColor: theme.colors.surfaceVariant }]}
+                onPress={() => {
+                  setShowDeleteModal(false);
+                  setDeletePassword('');
+                }}
+                disabled={isDeleting}
+              >
+                <Text style={[styles.modalButtonText, { color: theme.colors.text }]}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.deleteButton, { backgroundColor: theme.colors.error }]}
+                onPress={confirmDeleteAccount}
+                disabled={isDeleting || !deletePassword}
+              >
+                {isDeleting ? (
+                  <LoadingIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>
+                    Delete Forever
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -436,6 +525,58 @@ const styles = StyleSheet.create({
   footerSubtext: {
     fontSize: 12,
     marginTop: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 340,
+    borderRadius: 20,
+    padding: 24,
+  },
+  modalHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginTop: 12,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 8,
+    lineHeight: 20,
+  },
+  passwordInput: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButton: {},
+  deleteButton: {},
+  modalButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
 

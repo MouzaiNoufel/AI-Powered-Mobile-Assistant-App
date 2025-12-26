@@ -109,7 +109,7 @@ const HistoryScreen = ({ navigation }) => {
       conversation={item}
       onPress={handleConversationPress}
       onLongPress={handleConversationLongPress}
-      isActive={currentConversation?.id === item._id}
+      isActive={currentConversation?.id === item._id || currentConversation?._id === item._id}
     />
   ), [currentConversation, handleConversationPress, handleConversationLongPress]);
 

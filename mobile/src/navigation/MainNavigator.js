@@ -9,6 +9,7 @@ import {
   HistoryScreen,
   ProfileScreen,
   SettingsScreen,
+  ChangePasswordScreen,
 } from '../screens';
 import { useTheme } from '../context';
 
@@ -49,6 +50,7 @@ const ProfileStack = () => {
     >
       <Stack.Screen name="ProfileMain" component={ProfileScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
     </Stack.Navigator>
   );
 };

@@ -12,7 +12,7 @@ A production-ready, full-stack mobile application featuring AI-powered conversat
 
 ### Core Features
 - **AI-Powered Conversations**: Intelligent chat powered by OpenAI GPT-4 (with mock mode for development)
-- **Multi-Personality AI**: Choose from Professional, Friendly, Creative, or Technical personalities
+- **Multi-Personality AI**: Choose from Professional, Friendly, Concise, or Detailed personalities
 - **Conversation History**: Full conversation management with search and delete capabilities
 - **Secure Authentication**: JWT-based authentication with access and refresh tokens
 - **Usage Tracking**: Daily and monthly usage limits with real-time tracking
